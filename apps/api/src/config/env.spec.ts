@@ -1,0 +1,3 @@
+import { describe, expect, it } from 'vitest';
+import { validateEnv } from './env';
+describe('environment validation', () => { const base = { DATABASE_URL: 'postgresql://user:pass@localhost:5432/db', CORS_ORIGIN: 'http://localhost:3000', BETTER_AUTH_SECRET: 'a-secure-local-test-secret-that-is-long-enough', BETTER_AUTH_URL: 'http://localhost:3001/api/auth', S3_ENDPOINT: 'http://localhost:9000', S3_BUCKET: 'test' }; it('accepts a local configuration', () => { expect(validateEnv(base).PORT).toBe(3001); }); it('rejects a missing database URL', () => { const { DATABASE_URL, ...invalid } = base; expect(() => validateEnv(invalid)).toThrow('DATABASE_URL'); }); });

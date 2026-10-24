@@ -1,0 +1,1 @@
+-- Phase 00 baseline: no product tables. Add the initial domain schema in Phase 01.

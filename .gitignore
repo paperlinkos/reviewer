@@ -1,0 +1,16 @@
+node_modules/
+.pnpm-store/
+.turbo/
+.next/
+dist/
+.wxt/
+coverage/
+.firecrawl/
+*.log
+.env
+.env.local
+!.env.example
+apps/api/prisma/generated/
+.output/
+*.tsbuildinfo
+.DS_Store

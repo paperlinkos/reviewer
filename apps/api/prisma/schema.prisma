@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model User {
+  id                 String                @id @default(cuid())
+  name               String
+  email              String                @unique
+  emailVerified      Boolean               @default(false)
+  image              String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  memberships        WorkspaceMembership[]
+  ownedWorkspaces    Workspace[]           @relation("WorkspaceOwner")
+  createdProjects    Project[]             @relation("ProjectCreator")
+  createdInvitations ProjectInvitation[]   @relation("InvitationCreator")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model Workspace {
+  id          String                @id @default(cuid())
+  name        String
+  ownerId     String
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  owner       User                  @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  memberships WorkspaceMembership[]
+  projects    Project[]
+
+  @@index([ownerId])
+}
+
+model WorkspaceMembership {
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(MEMBER)
+  createdAt   DateTime      @default(now())
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, userId])
+  @@index([userId])
+}
+
+model Project {
+  id          String              @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  websiteUrl  String
+  status      ProjectStatus       @default(ACTIVE)
+  createdById String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy   User                @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  invitations ProjectInvitation[]
+
+  @@index([workspaceId, status])
+  @@index([createdById])
+}
+
+model ProjectInvitation {
+  id          String                @id @default(cuid())
+  projectId   String
+  createdById String
+  tokenHash   String                @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime              @default(now())
+  project     Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   User                  @relation("InvitationCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  sessions    ClientReviewSession[]
+
+  @@index([projectId, expiresAt])
+}
+
+model ClientReviewSession {
+  id           String            @id @default(cuid())
+  invitationId String
+  tokenHash    String            @unique
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime          @default(now())
+  invitation   ProjectInvitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+
+  @@index([invitationId, expiresAt])
+}

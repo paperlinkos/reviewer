@@ -1,0 +1,6 @@
+{
+  "name": "@vfp/extension", "version": "0.0.1", "private": true,
+  "scripts": { "dev": "wxt", "build": "wxt build", "lint": "eslint entrypoints", "typecheck": "wxt prepare && tsc --noEmit", "test": "vitest run --passWithNoTests" },
+  "dependencies": { "@wxt-dev/module-react": "^1.1.0", "react": "^19.0.0", "react-dom": "^19.0.0", "wxt": "^0.20.0" },
+  "devDependencies": { "@types/chrome": "^0.0.300", "@types/react": "^19.0.0", "@types/react-dom": "^19.0.0", "typescript": "^5.7.0", "vitest": "^3.0.0" }
+}

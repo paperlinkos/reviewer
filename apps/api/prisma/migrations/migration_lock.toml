@@ -1,0 +1,2 @@
+# Do not change this file manually. It records the migration provider.
+provider = "postgresql"

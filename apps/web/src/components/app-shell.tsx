@@ -1,0 +1,2 @@
+import type { PropsWithChildren } from 'react';
+export function AppShell({ children }: PropsWithChildren) { return <main className="shell"><nav><a className="brand" href="/">V<span>·</span>F</a><div className="nav-links"><a href="#projects">Projects</a><a href="#settings">Settings</a></div><button className="theme" type="button" aria-label="Theme support is available through system preference">◐</button></nav>{children}</main>; }
