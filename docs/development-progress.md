@@ -14,6 +14,10 @@
   Final-owner mutations use a transaction-scoped PostgreSQL advisory lock so
   concurrent removal/demotion cannot leave a workspace ownerless.
 - Dedicated Vitest configurations keep unit and integration suites separate.
+- Next.js workspace dashboard: authenticated workspace creation/listing/selection,
+  member listing and email-based addition, owner role controls, administrator
+  member removal, and server-returned permission/error messaging. The browser
+  sends credentialed requests only; the API remains the authorization authority.
 
 ### Verified workspace milestone (2026-10-24)
 
@@ -24,6 +28,9 @@
 - `pnpm --filter @vfp/api run test`: **4/4 passed**.
 - `pnpm --filter @vfp/api run typecheck`: passed.
 - `pnpm --filter @vfp/api run build`: passed.
+- `pnpm --filter @vfp/web run typecheck`: passed.
+- `pnpm --filter @vfp/web run build`: passed (with the pre-existing Next ESLint
+  configuration warning that its Next plugin is not detected).
 
 ## In progress
 
@@ -31,9 +38,9 @@
 
 ### Continuation point
 
-Implement the authenticated Next.js workspace creation, selection, and member
-management interface using the verified API. Then add workspace-scoped project
-CRUD and client-invitation/review-session APIs and their integration coverage.
+Implement workspace-scoped project CRUD, then client invitations and
+review-session authorization APIs with integration coverage. The workspace API
+and dashboard interface are implemented and verified.
 
 ## Deferred
 
