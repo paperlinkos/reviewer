@@ -59,6 +59,8 @@ export class IntegrationHarness {
     this.app.use('/api/auth', toNodeHandler(auth));
     this.app.setGlobalPrefix('api');
     this.app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
+    const { HttpErrorFilter } = await import('../common/http-exception.filter');
+    this.app.useGlobalFilters(new HttpErrorFilter());
     await this.app.init();
     this.prisma = new PrismaClient({ datasources: { db: { url: this.url } } });
     await this.prisma.$connect();

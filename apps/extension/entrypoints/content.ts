@@ -1,3 +1,7 @@
-export default defineContentScript({ matches: [], main() { // Site access is intentionally granted only later, for a user-started session.
-  console.info('Visual Feedback content script ready');
+export default defineContentScript({ matches: [], main() {
+  const rootId = 'vfp-review-root'; let active = false;
+  const remove = () => { document.getElementById(rootId)?.remove(); document.removeEventListener('click', place, true); active = false; };
+  const place = (event: MouseEvent) => { if (!active || event.button !== 0) return; const pin = document.createElement('button'); pin.textContent = '•'; pin.setAttribute('aria-label', 'Temporary feedback pin'); Object.assign(pin.style, { position: 'fixed', left: `${event.clientX - 10}px`, top: `${event.clientY - 10}px`, zIndex: '2147483647', border: '0', borderRadius: '50%', width: '20px', height: '20px', background: '#7357e8', color: 'white', cursor: 'pointer' }); pin.onclick = () => pin.remove(); document.getElementById(rootId)?.append(pin); event.preventDefault(); event.stopPropagation(); };
+  const activate = () => { if (active) return remove(); active = true; const root = document.createElement('aside'); root.id = rootId; root.setAttribute('aria-label', 'Visual Feedback review mode'); root.textContent = 'Review mode active — click an element to place a temporary pin. Click pins to remove.'; Object.assign(root.style, { position: 'fixed', right: '16px', bottom: '16px', zIndex: '2147483647', maxWidth: '280px', padding: '12px', borderRadius: '10px', background: '#1c1d20', color: 'white', font: '14px system-ui', pointerEvents: 'none' }); document.documentElement.append(root); document.addEventListener('click', place, true); };
+  chrome.runtime.onMessage.addListener((message: { type?: string }) => { if (message.type === 'toggle-review') activate(); if (message.type === 'disable-review') remove(); });
 } });

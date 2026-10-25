@@ -18,6 +18,12 @@ enum ProjectStatus {
   ARCHIVED
 }
 
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
 model User {
   id                 String                @id @default(cuid())
   name               String
@@ -32,6 +38,7 @@ model User {
   ownedWorkspaces    Workspace[]           @relation("WorkspaceOwner")
   createdProjects    Project[]             @relation("ProjectCreator")
   createdInvitations ProjectInvitation[]   @relation("InvitationCreator")
+  feedbackComments   FeedbackComment[]
 }
 
 model Session {
@@ -117,6 +124,7 @@ model Project {
   workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdBy   User                @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
   invitations ProjectInvitation[]
+  feedbacks   Feedback[]
 
   @@index([workspaceId, status])
   @@index([createdById])
@@ -144,7 +152,41 @@ model ClientReviewSession {
   expiresAt    DateTime
   revokedAt    DateTime?
   createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
   invitation   ProjectInvitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  feedbacks    Feedback[]
 
   @@index([invitationId, expiresAt])
+}
+
+model Feedback {
+  id              String              @id @default(cuid())
+  projectId       String
+  clientSessionId String
+  pageUrl         String
+  text            String
+  x               Float
+  y               Float
+  selector        String?
+  status          FeedbackStatus      @default(OPEN)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  project         Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clientSession   ClientReviewSession @relation(fields: [clientSessionId], references: [id], onDelete: Cascade)
+  comments        FeedbackComment[]
+
+  @@index([projectId, status])
+  @@index([clientSessionId])
+}
+
+model FeedbackComment {
+  id         String   @id @default(cuid())
+  feedbackId String
+  authorId   String
+  text       String
+  createdAt  DateTime @default(now())
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([feedbackId])
 }
